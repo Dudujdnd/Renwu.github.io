@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>任务中心 - 全屏美化版</title>
+    <title>任务中心</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         * {
@@ -106,14 +106,22 @@
             <p>⭕️发送完信息第一时间截图发给我</p>           
             <p>⭕️过时还要重新发以避免不必要的麻烦</p>
             <p>⭕️免费招收代理，我给你无限生成拉满，你帮我找人一个人完成任务2r，</p>
-            <p>❗️QQ:3794069496</p>
+            <p>❗️QQ: 3794069496</p>
             <p>❗️QQ群:727175932</p>
 
-        </div>
 
+        </div>
+<p>1.先把下面信息填入</p>
         <div class="task-panel">
             <div class="input-group">
-                <input type="tel" id="userPhone" placeholder="输入手机号" pattern="[0-9]{11}">
+                <input type="tel" 
+id="userPhone" placeholder="在此输入手机号" pattern="[0-9]{11}">
+              <select id="deviceType">
+                  
+                    <option value="">选择手机类型</option>
+                    <option>苹果</option>
+                    <option>安卓</option>
+                </select>
                 <select id="channel">
                     <option value="">选择游戏渠道</option>
                     <option>4399</option>
@@ -121,18 +129,13 @@
                     <option>官服</option>
                     <option>苹果官服</option>
                 </select>
-                <select id="deviceType">
-                    <option value="">选择手机类型</option>
-                    <option>苹果</option>
-                    <option>安卓</option>
-                </select>
             </div>
-
+<p>2.按顺序点击按钮</p>
             <div class="button-group">
-                <button class="button" id="step1">1. 发送验证码</button>
-                <button class="button" id="step2" disabled>2. 注册验证</button>
+                <button class="button" id="step1">第一步</button>
+                <button class="button" id="step2" disabled>第二步</button>
             </div>
-            <button class="button" id="copyBtn">📋 一键复制信息</button>
+            <button class="button" id="copyBtn">点击提交复制</button>
         </div>
     </div>
 
