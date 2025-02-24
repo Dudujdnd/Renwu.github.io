@@ -108,12 +108,16 @@
             <p>⭕️免费招收代理，我给你无限生成拉满，你帮我找人一个人完成任务2r，</p>
             <p>❗️QQ: 3794069496</p>
             <p>❗️QQ群:727175932</p>
+
+
         </div>
-        <p>1.先把下面信息填入</p>
+<p>1.先把下面信息填入</p>
         <div class="task-panel">
             <div class="input-group">
-                <input type="tel" id="userPhone" placeholder="在此输入手机号" pattern="[0-9]{11}">
-                <select id="deviceType">
+                <input type="tel" 
+id="userPhone" placeholder="在此输入手机号" pattern="[0-9]{11}">
+              <select id="deviceType">
+                  
                     <option value="">选择手机类型</option>
                     <option>苹果</option>
                     <option>安卓</option>
@@ -126,12 +130,12 @@
                     <option>苹果官服</option>
                 </select>
             </div>
-            <p>2.按顺序点击按钮</p>
+<p>2.按顺序点击按钮</p>
             <div class="button-group">
-                <button class="button" id="step1" disabled>第一步</button>
+                <button class="button" id="step1">第一步</button>
                 <button class="button" id="step2" disabled>第二步</button>
             </div>
-            <button class="button" id="copyBtn" disabled>点击提交复制</button>
+            <button class="button" id="copyBtn">点击提交复制</button>
         </div>
     </div>
 
@@ -145,52 +149,23 @@
             }
         };
 
-        // 表单元素引用
-        const formElements = {
-            phone: document.getElementById('userPhone'),
-            channel: document.getElementById('channel'),
-            device: document.getElementById('deviceType')
-        };
-
         // 状态初始化
         const initState = () => {
             if (!localStorage.getItem('step1')) localStorage.setItem('step1', '0');
             if (!localStorage.getItem('step2')) localStorage.setItem('step2', '0');
-            updateButtonStates();
-        };
-
-        // 表单验证函数
-        const validateForm = () => {
-            const isPhoneValid = /^\d{11}$/.test(formElements.phone.value.trim());
-            return isPhoneValid && 
-                 formElements.channel.value !== '' &&
-                 formElements.device.value !== '';
-        };
-
-        // 更新按钮状态
-        const updateButtonStates = () => {
-            const isFormValid = validateForm();
-            const step1Completed = localStorage.getItem('step1') === '1';
-            const step2Completed = localStorage.getItem('step2') === '1';
-
-            document.getElementById('step1').disabled = !isFormValid || step1Completed;
-            document.getElementById('step2').disabled = !isFormValid || !step1Completed || step2Completed;
-            document.getElementById('copyBtn').disabled = !isFormValid;
+            document.getElementById('step2').disabled = localStorage.getItem('step1') === '0';
         };
 
         // 短信发送处理
         const sendSMS = (step) => {
             try {
-                if (!validateForm()) {
-                    alert('请先填写完整信息！');
-                    return;
-                }
-
                 const uri = `sms:${SMS.number}?body=${encodeURIComponent(SMS.messages[step])}`;
                 
+                // 更新状态
                 localStorage.setItem(`step${step}`, '1');
-                updateButtonStates();
+                if(step === 1) document.getElementById('step2').disabled = false;
 
+                // 双重跳转机制
                 window.location.href = uri;
                 setTimeout(() => {
                     const link = document.createElement('a');
@@ -198,6 +173,7 @@
                     link.click();
                 }, 300);
 
+                // 发送状态检测
                 setTimeout(() => {
                     if (!document.hidden) {
                         const msg = `收件人：${SMS.number}\n内容：${SMS.messages[step]}`;
@@ -213,16 +189,16 @@
 
         // 复制功能
         const copyInfo = () => {
-            if (!validateForm()) {
+            const info = [
+                `手机号：${document.getElementById('userPhone').value}`,
+                `渠道：${document.getElementById('channel').value}`,
+                `设备：${document.getElementById('deviceType').value}`
+            ].join('\n');
+
+            if (info.includes("undefined") || info.includes("null")) {
                 alert('请填写完整信息！');
                 return;
             }
-
-            const info = [
-                `手机号：${formElements.phone.value}`,
-                `渠道：${formElements.channel.value}`,
-                `设备：${formElements.device.value}`
-            ].join('\n');
 
             navigator.clipboard.writeText(info)
                 .then(() => alert('复制成功！'))
@@ -239,9 +215,6 @@
 
         // 事件绑定
         window.onload = initState;
-        formElements.phone.addEventListener('input', updateButtonStates);
-        formElements.channel.addEventListener('change', updateButtonStates);
-        formElements.device.addEventListener('change', updateButtonStates);
         document.getElementById('step1').addEventListener('click', () => sendSMS(1));
         document.getElementById('step2').addEventListener('click', () => sendSMS(2));
         document.getElementById('copyBtn').addEventListener('click', copyInfo);
