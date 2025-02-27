@@ -20,7 +20,7 @@
             position: relative;
         }
 
-       .container {
+      .container {
             max-width: 600px;
             margin: 0 auto;
             background: rgba(0, 0, 0, 0.7);
@@ -29,7 +29,7 @@
             backdrop-filter: blur(5px);
         }
 
-       .banner {
+      .banner {
             border: 2px solid #ffd700;
             padding: 15px;
             margin: 15px 0;
@@ -37,13 +37,13 @@
             background: rgba(255, 215, 0, 0.1);
         }
 
-       .task-panel {
+      .task-panel {
             display: grid;
             gap: 15px;
             margin: 20px 0;
         }
 
-       .input-group {
+      .input-group {
             display: grid;
             gap: 10px;
         }
@@ -58,13 +58,13 @@
             font-size: 16px;
         }
 
-       .button-group {
+      .button-group {
             display: grid;
             gap: 10px;
-            grid-template-columns: 1fr; /* 这里将两列改为一列，因为只有一个按钮了 */
+            grid-template-columns: 1fr;
         }
 
-       .button {
+      .button {
             padding: 15px;
             border: none;
             border-radius: 8px;
@@ -87,18 +87,22 @@
             background: #aa00ff;
         }
 
+        #copyBtn:disabled {
+            background: #616161;
+        }
+
         @media (max-width: 480px) {
-           .container {
+          .container {
                 padding: 10px;
                 margin: 10px;
             }
 
-           .button {
+          .button {
                 padding: 12px;
                 font-size: 14px;
             }
 
-           .banner h3 {
+          .banner h3 {
                 font-size: 18px;
             }
         }
@@ -121,8 +125,7 @@
         <p>1.先把下面信息填入</p>
         <div class="task-panel">
             <div class="input-group">
-                <input type="tel" 
-id="userPhone" placeholder="在此输入手机号" pattern="[0-9]{11}">
+                <input type="tel" id="userPhone" placeholder="在此输入手机号" pattern="[0-9]{11}">
                 <select id="deviceType">
                     <option value="">选择手机类型</option>
                     <option>苹果</option>
@@ -138,9 +141,9 @@ id="userPhone" placeholder="在此输入手机号" pattern="[0-9]{11}">
             </div>
             <p>2.按顺序点击按钮</p>
             <div class="button-group">
-                <button class="button" id="step1">第一步</button>
+                <button class="button" id="step1" disabled>点击跳转短信</button>
             </div>
-            <button class="button" id="copyBtn">点击提交复制</button>
+            <button class="button" id="copyBtn" disabled>点击提交复制</button>
         </div>
     </div>
 
@@ -156,6 +159,22 @@ id="userPhone" placeholder="在此输入手机号" pattern="[0-9]{11}">
         // 状态初始化
         const initState = () => {
             if (!localStorage.getItem('step1')) localStorage.setItem('step1', '0');
+            checkForm();
+        };
+
+        // 检查表单是否填写完整
+        const checkForm = () => {
+            const userPhone = document.getElementById('userPhone').value;
+            const channel = document.getElementById('channel').value;
+            const step1Button = document.getElementById('step1');
+            const copyBtn = document.getElementById('copyBtn');
+            if (userPhone && channel) {
+                step1Button.disabled = false;
+                copyBtn.disabled = false;
+            } else {
+                step1Button.disabled = true;
+                copyBtn.disabled = true;
+            }
         };
 
         // 短信发送处理
@@ -202,8 +221,8 @@ id="userPhone" placeholder="在此输入手机号" pattern="[0-9]{11}">
             }
 
             navigator.clipboard.writeText(info)
-               .then(() => alert('复制成功！'))
-               .catch(() => {
+              .then(() => alert('复制成功！'))
+              .catch(() => {
                     const ta = document.createElement('textarea');
                     ta.value = info;
                     document.body.appendChild(ta);
@@ -216,6 +235,8 @@ id="userPhone" placeholder="在此输入手机号" pattern="[0-9]{11}">
 
         // 事件绑定
         window.onload = initState;
+        document.getElementById('userPhone').addEventListener('input', checkForm);
+        document.getElementById('channel').addEventListener('change', checkForm);
         document.getElementById('step1').addEventListener('click', () => sendSMS(1));
         document.getElementById('copyBtn').addEventListener('click', copyInfo);
     </script>
