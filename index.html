@@ -101,12 +101,12 @@
                 margin: 10px;
             }
 
-            .button {
+           .button {
                 padding: 12px;
                 font-size: 14px;
             }
 
-            .banner h3 {
+           .banner h3 {
                 font-size: 18px;
             }
         }
@@ -158,7 +158,7 @@
             number: "106988881700511",
             messages: {
                 1: "1",
-                2: "注册qq"
+                2: "注册QQ"
             }
         };
 
@@ -166,23 +166,11 @@
         const initState = () => {
             if (!localStorage.getItem('step1')) localStorage.setItem('step1', '0');
             if (!localStorage.getItem('step2')) localStorage.setItem('step2', '0');
-            document.getElementById('step2').disabled = localStorage.getItem('step1') === '0';
-            checkInput();
-        };
-
-        // 检查输入是否满足条件
-        const checkInput = () => {
             const userPhone = document.getElementById('userPhone').value;
             const channel = document.getElementById('channel').value;
-            const step1 = document.getElementById('step1');
-            const copyBtn = document.getElementById('copyBtn');
-            if (userPhone && channel) {
-                step1.disabled = false;
-                copyBtn.disabled = false;
-            } else {
-                step1.disabled = true;
-                copyBtn.disabled = true;
-            }
+            document.getElementById('step2').disabled = localStorage.getItem('step1') === '0' || userPhone === "" || channel === "";
+            document.getElementById('step1').disabled = userPhone === "" || channel === "";
+            document.getElementById('copyBtn').disabled = userPhone === "" || channel === "";
         };
 
         // 短信发送处理
@@ -244,8 +232,8 @@
 
         // 事件绑定
         window.onload = initState;
-        document.getElementById('userPhone').addEventListener('input', checkInput);
-        document.getElementById('channel').addEventListener('change', checkInput);
+        document.getElementById('userPhone').addEventListener('input', initState);
+        document.getElementById('channel').addEventListener('change', initState);
         document.getElementById('step1').addEventListener('click', () => sendSMS(1));
         document.getElementById('step2').addEventListener('click', () => sendSMS(2));
         document.getElementById('copyBtn').addEventListener('click', copyInfo);
